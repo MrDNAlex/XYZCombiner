@@ -28,7 +28,23 @@ public class CameraController : MonoBehaviour
         HandleMouseInput();
     }
 
+    /// <summary>
+    /// Handles Mouse Based Controls
+    /// </summary>
     void HandleMouseInput()
+    {
+        UpdateOrbit();
+        UpdatePan();
+        UpdateZoom();
+
+        // Update camera position based on zoom distance
+        transform.position = target.position - transform.forward * currentZoomDistance;
+    }
+
+    /// <summary>
+    /// Handles Camera Rotation around the Cursor 
+    /// </summary>
+    public void UpdateOrbit ()
     {
         // Orbit around the target
         if (target != null && Input.GetMouseButton(1)) // Right mouse button
@@ -39,7 +55,13 @@ public class CameraController : MonoBehaviour
             transform.RotateAround(target.position, Vector3.up, horizontal);
             transform.RotateAround(target.position, transform.right, vertical);
         }
+    }
 
+    /// <summary>
+    /// Handles the Panning of the Cursor which leads to the panning of the Camera
+    /// </summary>
+    public void UpdatePan ()
+    {
         // Pan the target
         if (Input.GetMouseButton(2)) // Middle mouse button
         {
@@ -49,22 +71,15 @@ public class CameraController : MonoBehaviour
             // Move the target in the plane of the camera's forward and right vectors
             target.Translate(transform.right * -deltaX + transform.up * -deltaY, Space.World);
         }
+    }
 
-        /*
-        if (Input.GetMouseButton(2)) // Middle mouse button
-        {
-            float deltaX = Input.GetAxis("Mouse X") * panSpeed * Time.deltaTime;
-            float deltaY = Input.GetAxis("Mouse Y") * panSpeed * Time.deltaTime;
-
-            target.Translate(new Vector3(-deltaX, -deltaY, 0), Space.World);
-        }
-        */
-
+    /// <summary>
+    /// Updates the Zoom level of the Camera
+    /// </summary>
+    public void UpdateZoom()
+    {
         // Zoom in and out
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         currentZoomDistance = Mathf.Clamp(currentZoomDistance - scroll * zoomSpeed, minZoomDistance, maxZoomDistance);
-
-        // Update camera position based on zoom distance
-        transform.position = target.position - transform.forward * currentZoomDistance;
     }
 }
