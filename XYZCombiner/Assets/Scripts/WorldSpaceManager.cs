@@ -43,13 +43,57 @@ public class WorldSpaceManager : MonoBehaviour
     public void ImportMolecule()
     {
         GameObject MoleculePrefab = Resources.Load<GameObject>("Molecule");
-
         GameObject moleculeObject = GameObject.Instantiate(MoleculePrefab, GameObject.Find("WorldSpace").transform);
+
         Molecule molecule = moleculeObject.GetComponent<Molecule>();
         molecule.CreateMoleculeFromXYZ(GetXYZFile());
 
         Molecules.Add(molecule);
     }
+
+    /*
+    void InstantiateMolecule(GameObject gameObj)
+    {
+        Debug.Log(gameObj.GetComponent<BoxCollider>().size);
+
+        // Check for collisions
+        Collider[] colliders = Physics.OverlapBox(gameObj.transform.position, gameObj.GetComponent<BoxCollider>().size);
+
+        // Adjust position if there are collisions
+        foreach (Collider collider in colliders)
+        {
+            if (collider != gameObj.GetComponent<Collider>()) // Skip self
+            {
+                Vector3 newPos = FindNonCollidingPosition(gameObj, collider);
+                gameObj.transform.position = newPos;
+            }
+        }
+    }
+
+    Vector3 FindNonCollidingPosition(GameObject obj, Collider otherCollider)
+    {
+        // Implement a logic to find a non-colliding position
+        // This can be as simple as moving the object along one axis until no collision is detected
+        Vector3 newPosition = obj.transform.position;
+
+        Vector3 hitboxSize = obj.GetComponent<BoxCollider>().size;
+
+        if (hitboxSize.x < hitboxSize.y && hitboxSize.x < hitboxSize.z)
+        {
+            newPosition.x += hitboxSize.x * 0.5f;
+        }
+        else if (hitboxSize.y < hitboxSize.x && hitboxSize.y < hitboxSize.z)
+        {
+            newPosition.y += hitboxSize.y * 0.5f;
+        }
+        else if (hitboxSize.z < hitboxSize.y && hitboxSize.z < hitboxSize.x)
+        {
+            newPosition.z += hitboxSize.z * 0.5f;
+        }
+
+        return newPosition;
+    }
+    */
 
     /// <summary>
     /// Formats the List of Molecules
