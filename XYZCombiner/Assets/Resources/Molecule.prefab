@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8056270588831398764}
   - component: {fileID: 8056270588831398765}
   - component: {fileID: 1129926579373530124}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Molecule
   m_TagString: Molecule
   m_Icon: {fileID: 0}

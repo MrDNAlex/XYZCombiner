@@ -24,6 +24,16 @@ public class XYZCombinerManager : MonoBehaviour
     [SerializeField] GameObject MoleculeList;
 
     /// <summary>
+    /// Text Box Displaying the Selected Molecule or Atom
+    /// </summary>
+    [SerializeField] GameObject SelectedList;
+
+    /// <summary>
+    /// Text Box Displaying if the Edit Mode is Active
+    /// </summary>
+    [SerializeField] GameObject EditMode;
+
+    /// <summary>
     /// Text Box Displaying the Selected Atoms Info
     /// </summary>
     [SerializeField] Text SelectedAtom;
@@ -41,24 +51,63 @@ public class XYZCombinerManager : MonoBehaviour
         WorldSpaceManager = WorldSpaceManagerObject.GetComponent<WorldSpaceManager>();
 
         importMoleculeBTN.onClick.AddListener(ImportNewMolecule);
+
+        WorldSpaceManager.UpdateGUI = UpdateUI;
     }
 
     /// <summary>
     /// Imports a new Molecule into the World Space
     /// </summary>
-    public void ImportNewMolecule ()
+    public void ImportNewMolecule()
     {
         WorldSpaceManager.ImportMolecule();
-
-        UpdateUI();
     }
 
     /// <summary>
     /// Updates the UI Displaying Info about the Scene
     /// </summary>
-    public void UpdateUI ()
+    public void UpdateUI()
     {
+        //Clear Children
+        foreach (Transform child in MoleculeList.transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+
+        foreach (Transform child in SelectedList.transform)
+        {
+            GameObject.Destroy(child.gameObject);
+        }
+
         UpdateMoleculeList();
+
+        UpdateSelectedAtom();
+
+        EditMode.GetComponent<Text>().text = $"Mode: {WorldSpaceManager.TranslateMode}";
+    }
+
+    /// <summary>
+    /// Updates the info for the selected Atom
+    /// </summary>
+    public void UpdateSelectedAtom()
+    {
+        GameObject infoPrefab = Resources.Load<GameObject>("ListInfo");
+
+        string info = WorldSpaceManager.GetSelectedAtom();
+
+        if (info != "")
+        {
+            GameObject infoLine = GameObject.Instantiate(infoPrefab, SelectedList.transform);
+            infoLine.GetComponent<Text>().text = info;
+        }
+      
+        info = WorldSpaceManager.GetSelectedMolecule();
+
+        if (info != "")
+        {
+            GameObject infoLine = GameObject.Instantiate(infoPrefab, SelectedList.transform);
+            infoLine.GetComponent<Text>().text = info;
+        }
     }
 
     /// <summary>
@@ -66,7 +115,6 @@ public class XYZCombinerManager : MonoBehaviour
     /// </summary>
     public void UpdateMoleculeList()
     {
-        MoleculeList.transform.DetachChildren();
         GameObject infoPrefab = Resources.Load<GameObject>("ListInfo");
 
         List<string> info = WorldSpaceManager.GetMoleculeList();

@@ -8,20 +8,123 @@ using UnityEngine.UI;
 public class WorldSpaceManager : MonoBehaviour
 {
     /// <summary>
+    /// Delegate Function Type for the Update GUI Function
+    /// </summary>
+    public delegate void UpdateUI();
+
+    /// <summary>
+    /// Delegate Function storing a reference to the UpdateGUI Function in the XYZCombinerManager
+    /// </summary>
+    public UpdateUI UpdateGUI;
+
+    public bool TranslateMode { get; set; }
+
+    /// <summary>
     /// Stores the list of Molecules in the World Space
     /// </summary>
     public List<Molecule> Molecules { get; set; }
+
+    /// <summary>
+    /// Returns the Layer Mask Number for Molecules
+    /// </summary>
+    public int MoleculeLayer { get { return LayerMask.NameToLayer("Molecule"); } }
+
+    /// <summary>
+    /// Returns the Layer Mask Number for Atoms
+    /// </summary>
+    public int AtomLayer { get { return LayerMask.NameToLayer("Atom"); } }
+
+    /// <summary>
+    /// Layer Mask for Selecting Molecules Only
+    /// </summary>
+    public LayerMask MoleculeLayerMask { get { return LayerMask.GetMask("Molecule"); } }
+
+    /// <summary>
+    /// Layer Mask for Selecting Atoms Only
+    /// </summary>
+    public LayerMask AtomLayerMask { get { return LayerMask.GetMask("Atom"); } }
+
+    /// <summary>
+    /// Currently Selected Atom
+    /// </summary>
+    public Atom SelectedAtom { get; set; }
+
+    /// <summary>
+    /// Currently Selected Molecule
+    /// </summary>
+    public Molecule SelectedMolecule { get; set; }
 
     // Start is called before the first frame update
     void Start()
     {
         Molecules = new List<Molecule>();
+
+        TranslateMode = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetMouseButtonDown(0))
+        {
+            SelectAtom();
+        }
+
+        if (Input.GetKeyDown(KeyCode.T))
+        {
+            TranslateMode = !TranslateMode;
+            UpdateGUI.Invoke();
+        }
+           
+        //Make it so that there is a plane perpendicular to the camera (normal of plane is looking at camera) and the plane is located at the molecule or atoms center, then use a Hit Ray scan to move it around on the plane. Have the plane rotate around always normal 
+
+        if (TranslateMode)
+        {
+            SelectedMolecule.Position += new Vector3(Input.GetAxis("Mouse X"), 0, 0);
+            UpdateGUI.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Sends a Raycast in the hopes of hitting and selecting an Atom
+    /// </summary>
+    public void SelectAtom ()
+    {
+        // Create a ray from the camera's position pointing forward
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+        // Set the maximum distance the ray can travel
+        float maxRaycastDistance = 10000f;
+
+        // Create a RaycastHit variable to store information about the hit
+        RaycastHit hit;
+
+        // Perform the raycast
+        if (Physics.Raycast(ray, out hit, maxRaycastDistance, AtomLayerMask))
+        {
+            if (hit.collider != null)
+            {
+                SelectedAtom = hit.collider.gameObject.GetComponent<Atom>();
+                SelectedMolecule = SelectedAtom.ParentMolecule;
+            }
+        } else
+        {
+            if (Physics.Raycast(ray, out hit, maxRaycastDistance, MoleculeLayerMask))
+            {
+                // Check if the object hit is on the specified layer
+                if (hit.collider != null)
+                {
+                    SelectedMolecule = hit.collider.gameObject.GetComponent<Molecule>();
+                    SelectedAtom = null;
+                }
+            } else
+            {
+                SelectedAtom = null;
+                SelectedMolecule = null;
+            }
+        }
+
+        UpdateGUI.Invoke();
     }
 
     /// <summary>
@@ -49,8 +152,9 @@ public class WorldSpaceManager : MonoBehaviour
         molecule.CreateMoleculeFromXYZ(GetXYZFile());
 
         RemoveOvelapping(moleculeObject);
-
         Molecules.Add(molecule);
+
+        UpdateGUI.Invoke();
     }
 
     /// <summary>
@@ -62,24 +166,23 @@ public class WorldSpaceManager : MonoBehaviour
         bool overlapping = true;
         int loop = 0;
 
-        while(overlapping)
+        while (overlapping)
         {
             // Check for collisions
-            Collider[] colliders = Physics.OverlapBox(gameObj.transform.position, gameObj.GetComponent<BoxCollider>().size);
+            Collider[] colliders = Physics.OverlapBox(gameObj.transform.position, gameObj.GetComponent<BoxCollider>().size, gameObj.transform.rotation, MoleculeLayerMask);
 
             if (colliders.Length == 0 || loop >= 100)
                 overlapping = false;
-
+            
             // Adjust position if there are collisions
             foreach (Collider collider in colliders)
             {
-                if (collider != gameObj.GetComponent<Collider>() && collider.gameObject.tag == "Molecule")
+                if (collider != gameObj.GetComponent<Collider>() && collider.gameObject.layer == MoleculeLayer)
                     gameObj.transform.position = FindNonCollidingPosition(gameObj, collider);
             }
 
             loop++;
         }
-       
     }
 
     /// <summary>
@@ -111,22 +214,46 @@ public class WorldSpaceManager : MonoBehaviour
 
         return newPosition;
     }
-    
+
     /// <summary>
     /// Formats the List of Molecules
     /// </summary>
     /// <returns></returns>
-    public List<string> GetMoleculeList ()
+    public List<string> GetMoleculeList()
     {
         List<string> moleculeList = new List<string>();
 
-        foreach(Molecule molecule in Molecules)
+        foreach (Molecule molecule in Molecules)
         {
-           string moleculeInfo = molecule.MoleculeName + $"   ({molecule.Position.x}, {molecule.Position.y}, {molecule.Position.z})";
+            string moleculeInfo = molecule.MoleculeName + $"   ({molecule.Position.x}, {molecule.Position.y}, {molecule.Position.z})";
 
             moleculeList.Add(moleculeInfo);
         }
 
         return moleculeList;
+    }
+
+    /// <summary>
+    /// Returns the Info of the Selected Atom
+    /// </summary>
+    /// <returns></returns>
+    public string GetSelectedAtom ()
+    {
+        if (SelectedAtom != null)
+            return $" {SelectedAtom.name} : {SelectedAtom.Position}";
+        else
+            return "";
+    }
+
+    /// <summary>
+    /// Returns the Info of the Selected Molecule
+    /// </summary>
+    /// <returns></returns>
+    public string GetSelectedMolecule ()
+    {
+        if (SelectedMolecule != null)
+            return $" {SelectedMolecule.name} : {SelectedMolecule.Position}";
+        else
+            return "";
     }
 }

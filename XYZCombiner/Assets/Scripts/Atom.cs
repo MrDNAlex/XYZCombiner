@@ -8,6 +8,11 @@ using UnityEngine;
 public class Atom : MonoBehaviour
 {
     /// <summary>
+    /// Reference to the Molecule that the Atom in Contained in
+    /// </summary>
+    public Molecule ParentMolecule { get; set; }
+
+    /// <summary>
     /// Describes the Atoms Element 
     /// </summary>
     public string Element { get; set; }
@@ -22,10 +27,11 @@ public class Atom : MonoBehaviour
     /// </summary>
     /// <param name="element"></param>
     /// <param name="position"></param>
-    public void SetInfo(string element, Vector3 position)
+    public void SetInfo(string element, Vector3 position, Molecule parentMolecule)
     {
         Element = element;
         Position = position;
+        ParentMolecule = parentMolecule;
 
         ApplyInfoToModel();
     }

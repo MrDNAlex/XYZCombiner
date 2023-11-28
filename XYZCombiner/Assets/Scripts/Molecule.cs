@@ -14,7 +14,7 @@ public class Molecule : MonoBehaviour
     /// <summary>
     /// Describes the Molecules Position Relative to World Space
     /// </summary>
-    public Vector3 Position { get { return transform.position; } }
+    public Vector3 Position { get { return transform.position; } set { transform.position = value; } }
     /// <summary>
     /// A List of Atoms tht belong to the Molecules
     /// </summary>
@@ -60,7 +60,7 @@ public class Molecule : MonoBehaviour
             GameObject atomPrefab = Resources.Load<GameObject>("Atom");
             GameObject atomObject = GameObject.Instantiate(atomPrefab, pos, new Quaternion(), this.transform);
             Atom atom = atomObject.GetComponent<Atom>();
-            atom.SetInfo(info[0], pos);
+            atom.SetInfo(info[0], pos, this);
             Atoms.Add(atom);
         }
 
