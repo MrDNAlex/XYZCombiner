@@ -48,28 +48,46 @@ public class WorldSpaceManager : MonoBehaviour
         Molecule molecule = moleculeObject.GetComponent<Molecule>();
         molecule.CreateMoleculeFromXYZ(GetXYZFile());
 
+        RemoveOvelapping(moleculeObject);
+
         Molecules.Add(molecule);
     }
 
-    /*
-    void InstantiateMolecule(GameObject gameObj)
+    /// <summary>
+    /// Loops infinitely until there are no longer colliding molecules
+    /// </summary>
+    /// <param name="gameObj"></param>
+    void RemoveOvelapping(GameObject gameObj)
     {
-        Debug.Log(gameObj.GetComponent<BoxCollider>().size);
+        bool overlapping = true;
+        int loop = 0;
 
-        // Check for collisions
-        Collider[] colliders = Physics.OverlapBox(gameObj.transform.position, gameObj.GetComponent<BoxCollider>().size);
-
-        // Adjust position if there are collisions
-        foreach (Collider collider in colliders)
+        while(overlapping)
         {
-            if (collider != gameObj.GetComponent<Collider>()) // Skip self
+            // Check for collisions
+            Collider[] colliders = Physics.OverlapBox(gameObj.transform.position, gameObj.GetComponent<BoxCollider>().size);
+
+            if (colliders.Length == 0 || loop >= 100)
+                overlapping = false;
+
+            // Adjust position if there are collisions
+            foreach (Collider collider in colliders)
             {
-                Vector3 newPos = FindNonCollidingPosition(gameObj, collider);
-                gameObj.transform.position = newPos;
+                if (collider != gameObj.GetComponent<Collider>() && collider.gameObject.tag == "Molecule")
+                    gameObj.transform.position = FindNonCollidingPosition(gameObj, collider);
             }
+
+            loop++;
         }
+       
     }
 
+    /// <summary>
+    /// Finds the Shortest change in position necessary to remove the collision between the molecule and another
+    /// </summary>
+    /// <param name="obj"></param>
+    /// <param name="otherCollider"></param>
+    /// <returns></returns>
     Vector3 FindNonCollidingPosition(GameObject obj, Collider otherCollider)
     {
         // Implement a logic to find a non-colliding position
@@ -93,8 +111,7 @@ public class WorldSpaceManager : MonoBehaviour
 
         return newPosition;
     }
-    */
-
+    
     /// <summary>
     /// Formats the List of Molecules
     /// </summary>

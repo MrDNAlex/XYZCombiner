@@ -23,9 +23,19 @@ public class Molecule : MonoBehaviour
     /// Returns the Number of Atoms in the Molecule
     /// </summary>
     public int NumOfAtoms { get { return Atoms.Count; } }
+
+    /// <summary>
+    /// Returns and Sets the Molecules Hit Box Center Position
+    /// </summary>
+    public Vector3 MoleculeCenter { get { return GetComponent<BoxCollider>().center; } private set { GetComponent<BoxCollider>().center = value; } }
+
+    /// <summary>
+    /// Returns and Sets the Molecules Hit Box Dimensions
+    /// </summary>
+    public Vector3 MoleculeDimensions { get { return GetComponent<BoxCollider>().size; } private set { GetComponent<BoxCollider>().size = value; } }
+
     public Molecule()
     {
-        Debug.Log("Initialize");
         Atoms = new List<Atom>();
     }
     /// <summary>
@@ -39,9 +49,7 @@ public class Molecule : MonoBehaviour
         //Rest of lines are atoms [2 -> Infinity]
         string[] fileLines = XYZFile.Split("\n");
         int numOfAtoms = int.Parse(fileLines[0]);
-        Debug.Log(numOfAtoms);
         MoleculeName = fileLines[1];
-        Debug.Log(MoleculeName);
         this.name = MoleculeName;
 
         for (int i = 2; i < 2 + numOfAtoms; i++)
@@ -56,21 +64,32 @@ public class Molecule : MonoBehaviour
             Atoms.Add(atom);
         }
 
-        SetHitBox();
+        SetHitBoxCenter();
+        SetHitBoxDimensions();
     }
 
     /// <summary>
-    /// Sets the Hitbox Bounds
+    /// Sets the Molecules Hit Box Center
     /// </summary>
-    public void SetHitBox ()
+    public void SetHitBoxCenter()
     {
-        Vector3 avgPosition = new Vector3(0,0,0);
+        Vector3 avgPosition = new Vector3(0, 0, 0);
 
         foreach (Atom atom in Atoms)
             avgPosition += atom.Position;
 
         avgPosition = avgPosition / Atoms.Count;
-        
+
+        MoleculeCenter = avgPosition;
+    }
+
+    /// <summary>
+    /// Sets the Molecules Hit Box Dimensions from the center
+    /// </summary>
+    public void SetHitBoxDimensions()
+    {
+        Vector3 avgPosition = MoleculeCenter;
+
         Vector3 hitboxDim = new Vector3(0, 0, 0);
 
         foreach (Atom atom in Atoms)
@@ -83,15 +102,13 @@ public class Molecule : MonoBehaviour
 
         hitboxDim = hitboxDim * 2;
         hitboxDim = hitboxDim + Vector3.one;
-        
-        GetComponent<BoxCollider>().center = avgPosition;
-        GetComponent<BoxCollider>().size = hitboxDim;
+
+        MoleculeDimensions = hitboxDim;
     }
 
     // Start is called before the first frame update
     void Start()
     {
-        Debug.Log("Start");
     }
     // Update is called once per frame
     void Update()
