@@ -64,23 +64,22 @@ public class Molecule : MonoBehaviour
             Atoms.Add(atom);
         }
 
-        SetHitBoxCenter();
         SetHitBoxDimensions();
     }
 
     /// <summary>
     /// Sets the Molecules Hit Box Center
     /// </summary>
-    public void SetHitBoxCenter()
+    public Vector3 GetHitBoxCenter()
     {
         Vector3 avgPosition = new Vector3(0, 0, 0);
 
         foreach (Atom atom in Atoms)
             avgPosition += atom.Position;
 
-        avgPosition = avgPosition / Atoms.Count;
+        MoleculeCenter = Vector3.zero;
 
-        MoleculeCenter = avgPosition;
+        return avgPosition / Atoms.Count;
     }
 
     /// <summary>
@@ -88,7 +87,7 @@ public class Molecule : MonoBehaviour
     /// </summary>
     public void SetHitBoxDimensions()
     {
-        Vector3 avgPosition = MoleculeCenter;
+        Vector3 avgPosition = GetHitBoxCenter();
 
         Vector3 hitboxDim = new Vector3(0, 0, 0);
 
@@ -98,6 +97,8 @@ public class Molecule : MonoBehaviour
             hitboxDim.x = Mathf.Max(hitboxDim.x, Mathf.Abs(truePosition.x));
             hitboxDim.y = Mathf.Max(hitboxDim.y, Mathf.Abs(truePosition.y));
             hitboxDim.z = Mathf.Max(hitboxDim.z, Mathf.Abs(truePosition.z));
+
+            atom.SetOffsetPosition(avgPosition);
         }
 
         hitboxDim = hitboxDim * 2;

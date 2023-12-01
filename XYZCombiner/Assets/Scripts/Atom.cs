@@ -23,6 +23,16 @@ public class Atom : MonoBehaviour
     public Vector3 Position { get; set; }
 
     /// <summary>
+    /// Returns the True position of the Atom based off the Input File
+    /// </summary>
+    public Vector3 FilePosition { get { return Position + FilePositionOffset; } }
+
+    /// <summary>
+    /// Offset vector for each atom, equal to the average position of the Parent Molecule
+    /// </summary>
+    public Vector3 FilePositionOffset { get; set; }
+
+    /// <summary>
     /// Sets the Atoms Information
     /// </summary>
     /// <param name="element"></param>
@@ -34,6 +44,13 @@ public class Atom : MonoBehaviour
         ParentMolecule = parentMolecule;
 
         ApplyInfoToModel();
+    }
+
+    public void SetOffsetPosition (Vector3 offset)
+    {
+        FilePositionOffset = offset;
+        Position = Position - offset;
+        transform.position = Position;
     }
 
     /// <summary>

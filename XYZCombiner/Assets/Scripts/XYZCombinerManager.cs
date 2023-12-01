@@ -29,9 +29,14 @@ public class XYZCombinerManager : MonoBehaviour
     [SerializeField] GameObject SelectedList;
 
     /// <summary>
-    /// Text Box Displaying if the Edit Mode is Active
+    /// Text Box Displaying if the Translation Mode is Active
     /// </summary>
-    [SerializeField] GameObject EditMode;
+    [SerializeField] GameObject TranslationMode;
+
+    /// <summary>
+    /// Text Box Displaying if the Rotation Mode is Active
+    /// </summary>
+    [SerializeField] GameObject RotationMode;
 
     /// <summary>
     /// Text Box Displaying the Selected Atoms Info
@@ -83,7 +88,8 @@ public class XYZCombinerManager : MonoBehaviour
 
         UpdateSelectedAtom();
 
-        EditMode.GetComponent<Text>().text = $"Mode: {WorldSpaceManager.TranslateMode}";
+        TranslationMode.GetComponent<Text>().text = $"Translation : {WorldSpaceManager.TranslateMode}";
+        RotationMode.GetComponent<Text>().text = $"Rotation : {WorldSpaceManager.RotateMode}";
     }
 
     /// <summary>
