@@ -80,6 +80,11 @@ public class WorldSpaceManager : MonoBehaviour
             SelectAtom();
         }
 
+        if (Input.GetKeyDown(KeyCode.Backspace))
+        {
+            RemoveAtom();
+        }
+
         TransformManager.UpdateTransformations();
     }
 
@@ -88,29 +93,23 @@ public class WorldSpaceManager : MonoBehaviour
     /// </summary>
     public void SelectAtom()
     {
-        // Create a ray from the camera's position pointing forward
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        // Set the maximum distance the ray can travel
         float maxRaycastDistance = 10000f;
-
-        // Create a RaycastHit variable to store information about the hit
         RaycastHit hit;
 
-        // Perform the raycast
         if (Physics.Raycast(ray, out hit, maxRaycastDistance, AtomLayerMask))
         {
             if (hit.collider != null)
             {
                 SelectedAtom = hit.collider.gameObject.GetComponent<Atom>();
                 SelectedMolecule = SelectedAtom.ParentMolecule;
+                TransformManager.SetSelectedObj(SelectedAtom.gameObject);
             }
         }
         else
         {
             if (Physics.Raycast(ray, out hit, maxRaycastDistance, MoleculeLayerMask))
             {
-                // Check if the object hit is on the specified layer
                 if (hit.collider != null)
                 {
                     SelectedMolecule = hit.collider.gameObject.GetComponent<Molecule>();
@@ -126,6 +125,16 @@ public class WorldSpaceManager : MonoBehaviour
         }
 
         UpdateGUI.Invoke();
+    }
+
+    /// <summary>
+    /// Removes the Atom from the Molecule
+    /// </summary>
+    private void RemoveAtom ()
+    {
+        //Not quite right
+        SelectedMolecule.Atoms.Remove(SelectedAtom);
+        GameObject.Destroy(SelectedAtom.gameObject);
     }
 
     /// <summary>

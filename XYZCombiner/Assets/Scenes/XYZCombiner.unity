@@ -663,7 +663,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   TranslationPlane: {fileID: 1192052751}
-  lastDelta: {x: 0, y: 0, z: 0}
 --- !u!1 &765754558
 GameObject:
   m_ObjectHideFlags: 0

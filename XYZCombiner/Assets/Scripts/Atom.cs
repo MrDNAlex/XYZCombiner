@@ -20,7 +20,7 @@ public class Atom : MonoBehaviour
     /// <summary>
     /// Describes the Atoms Position Relative to the Molecule
     /// </summary>
-    public Vector3 Position { get; set; }
+    public Vector3 Position { get { return transform.position; } set { transform.position = value; } }
 
     /// <summary>
     /// Returns the True position of the Atom based off the Input File
@@ -46,6 +46,10 @@ public class Atom : MonoBehaviour
         ApplyInfoToModel();
     }
 
+    /// <summary>
+    /// Offsets the Position of the Atom based on the value offset
+    /// </summary>
+    /// <param name="offset"></param>
     public void SetOffsetPosition (Vector3 offset)
     {
         FilePositionOffset = offset;

@@ -200,6 +200,7 @@ public class TransformManager
         if (Input.GetKeyDown(KeyCode.T))
         {
             ToggleTransformationMode(Transformation.Translation);
+            UpdateGUI?.Invoke();
         }
 
         if (Input.GetKeyDown(KeyCode.R))
@@ -207,6 +208,7 @@ public class TransformManager
             ToggleTransformationMode(Transformation.Rotation);
             _goodToRotate = false;
             _count = 0;
+            UpdateGUI?.Invoke();
         }
     }
 

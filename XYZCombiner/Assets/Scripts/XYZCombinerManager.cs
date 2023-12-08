@@ -89,7 +89,7 @@ public class XYZCombinerManager : MonoBehaviour
 
         UpdateSelectedAtom();
 
-        TranslationMode.GetComponent<Text>().text = $"{WorldSpaceManager.TransformManager.TransformationAction}";
+        TranslationMode.GetComponent<Text>().text = $"Transformation : {WorldSpaceManager.TransformManager.TransformationAction}";
 
     }
 

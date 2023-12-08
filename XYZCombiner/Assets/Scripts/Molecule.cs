@@ -15,6 +15,7 @@ public class Molecule : MonoBehaviour
     /// Describes the Molecules Position Relative to World Space
     /// </summary>
     public Vector3 Position { get { return transform.position; } set { transform.position = value; } }
+
     /// <summary>
     /// A List of Atoms tht belong to the Molecules
     /// </summary>
