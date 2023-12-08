@@ -58,6 +58,7 @@ public class XYZCombinerManager : MonoBehaviour
         importMoleculeBTN.onClick.AddListener(ImportNewMolecule);
 
         WorldSpaceManager.UpdateGUI = UpdateUI;
+        WorldSpaceManager.TransformManager.SetUpdateFunction(UpdateUI);
     }
 
     /// <summary>
@@ -88,8 +89,8 @@ public class XYZCombinerManager : MonoBehaviour
 
         UpdateSelectedAtom();
 
-        TranslationMode.GetComponent<Text>().text = $"Translation : {WorldSpaceManager.TranslateMode}";
-        RotationMode.GetComponent<Text>().text = $"Rotation : {WorldSpaceManager.RotateMode}";
+        TranslationMode.GetComponent<Text>().text = $"{WorldSpaceManager.TransformManager.TransformationAction}";
+
     }
 
     /// <summary>

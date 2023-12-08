@@ -17,15 +17,12 @@ public class WorldSpaceManager : MonoBehaviour
     /// <summary>
     /// Delegate Function storing a reference to the UpdateGUI Function in the XYZCombinerManager
     /// </summary>
-    public UpdateUI UpdateGUI;
+    public UpdateUI UpdateGUI { get; set; }
 
     /// <summary>
-    /// Toggle for the Translation Edit Mode
+    /// Transform Manager that handles all Transform related actions such as Rotation and Translation
     /// </summary>
-    public bool TranslateMode { get; set; }
-
-
-    public bool RotateMode { get; set; }
+    public TransformManager TransformManager { get; set; }
 
     /// <summary>
     /// Stores the list of Molecules in the World Space
@@ -52,9 +49,6 @@ public class WorldSpaceManager : MonoBehaviour
     /// </summary>
     public LayerMask AtomLayerMask { get { return LayerMask.GetMask("Atom"); } }
 
-
-    public LayerMask TranslationLayerMask { get { return LayerMask.GetMask("TranslationPlane"); } }
-
     /// <summary>
     /// Currently Selected Atom
     /// </summary>
@@ -65,165 +59,28 @@ public class WorldSpaceManager : MonoBehaviour
     /// </summary>
     public Molecule SelectedMolecule { get; set; }
 
-    public Vector3 lastDelta;
+    private void Awake()
+    {
+        Molecules = new List<Molecule>();
+        TransformManager = new TransformManager();
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        Molecules = new List<Molecule>();
 
-        TranslateMode = false;
     }
 
     // Update is called once per frame
     void Update()
     {
+
         if (Input.GetMouseButtonDown(0))
         {
             SelectAtom();
         }
 
-        if (Input.GetKeyDown(KeyCode.T))
-        {
-            TranslateMode = !TranslateMode;
-
-            UpdateGUI.Invoke();
-        }
-
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            RotateMode = !RotateMode;
-            lastDelta = SelectedMolecule.Position - GetRayPosition(TranslationLayerMask);
-            //StartRotation = SelectedMolecule.transform.rotation;
-            UpdateGUI.Invoke();
-        }
-
-        //Make it so that there is a plane perpendicular to the camera (normal of plane is looking at camera) and the plane is located at the molecule or atoms center, then use a Hit Ray scan to move it around on the plane. Have the plane rotate around always normal 
-
-        if (TranslateMode)
-        {
-            AlignWithCameraDirection();
-            TranslateSelectedObject();
-
-            UpdateGUI.Invoke();
-        }
-
-        if (RotateMode)
-        {
-            AlignWithCameraDirection();
-            RotateSelectedObject();
-            UpdateGUI.Invoke();
-        }
-
-    }
-
-    public void RotateSelectedObject()
-    {
-
-        //This is not quite right still
-
-        
-        Vector3 currentMousePosition = GetRayPosition(TranslationLayerMask);
-        Vector3 deltaMousePosition = SelectedMolecule.Position - currentMousePosition;
-
-        Vector3 rotationAxis = TranslationPlane.transform.up; // You can change the rotation axis as needed
-
-        // Use Quaternion to calculate rotation
-        Quaternion rotation = Quaternion.FromToRotation(lastDelta, deltaMousePosition);
-
-        // Define a maximum angle to rotate in one frame
-        float maxAngle = 1000f * Time.deltaTime;
-
-        // Use RotateTowards to limit the rotation angle
-        Quaternion targetRotation = Quaternion.RotateTowards(SelectedMolecule.transform.rotation, SelectedMolecule.transform.rotation * rotation, maxAngle);
-
-        SelectedMolecule.transform.rotation = targetRotation;
-
-        lastDelta = deltaMousePosition;
-        
-        /*
-        Vector3 currentMousePosition = GetRayPosition(TranslationLayerMask);
-        Vector3 deltaMousePosition = SelectedMolecule.Position - currentMousePosition;
-
-        Vector3 rotationAxis = TranslationPlane.transform.up;
-
-        // Project the rotation axis onto the plane defined by TranslationPlane.up
-        rotationAxis = Vector3.ProjectOnPlane(rotationAxis, deltaMousePosition.normalized).normalized;
-
-        // Use Quaternion to calculate rotation
-        Quaternion rotation = Quaternion.FromToRotation(lastDelta, deltaMousePosition);
-
-        // Define a maximum angle to rotate in one frame
-        float maxAngle = 500f * Time.deltaTime;
-
-        // Use RotateTowards to limit the rotation angle
-        Quaternion targetRotation = Quaternion.RotateTowards(SelectedMolecule.transform.rotation, SelectedMolecule.transform.rotation * rotation, maxAngle);
-
-        SelectedMolecule.transform.rotation = targetRotation;
-
-        lastDelta = deltaMousePosition;
-        */
-        //Not right either, work off of this though, we will probably have to develop the 
-    }
-
-    public Vector3 GetRayPosition(LayerMask layerMask)
-    {
-        // Create a ray from the camera's position pointing forward
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        // Set the maximum distance the ray can travel
-        float maxRaycastDistance = 1000000000000;
-
-        // Create a RaycastHit variable to store information about the hit
-        RaycastHit hit;
-
-        // Perform the raycast
-        if (Physics.Raycast(ray, out hit, maxRaycastDistance, layerMask))
-        {
-            if (hit.collider != null)
-            {
-                return hit.point;
-            }
-            else
-                return Vector3.zero;
-        }
-        else
-            return Vector3.zero;
-    }
-
-    public void TranslateSelectedObject()
-    {
-        // Create a ray from the camera's position pointing forward
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        // Set the maximum distance the ray can travel
-        float maxRaycastDistance = 1000000000000;
-
-        // Create a RaycastHit variable to store information about the hit
-        RaycastHit hit;
-
-        // Perform the raycast
-        if (Physics.Raycast(ray, out hit, maxRaycastDistance, TranslationLayerMask))
-        {
-            if (hit.collider != null)
-                SelectedMolecule.Position = hit.point;
-        }
-    }
-
-    void AlignWithCameraDirection()
-    {
-        // Get the main camera
-        Camera mainCamera = Camera.main;
-
-        if (mainCamera != null)
-        {
-            Vector3 cameraForward = mainCamera.transform.forward;
-            TranslationPlane.transform.up = -1 * cameraForward;
-            TranslationPlane.transform.position = SelectedMolecule.Position;
-        }
-        else
-        {
-            Debug.LogError("Main camera not found.");
-        }
+        TransformManager.UpdateTransformations();
     }
 
     /// <summary>
@@ -257,6 +114,7 @@ public class WorldSpaceManager : MonoBehaviour
                 if (hit.collider != null)
                 {
                     SelectedMolecule = hit.collider.gameObject.GetComponent<Molecule>();
+                    TransformManager.SetSelectedObj(SelectedMolecule.gameObject);
                     SelectedAtom = null;
                 }
             }
