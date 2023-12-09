@@ -78,7 +78,12 @@ public class TransformManager
     /// <summary>
     /// Saves the Vector Used to Translate
     /// </summary>
-    public Vector3 SavedVector;
+    public List<Vector3> SavedVectors;
+
+    /// <summary>
+    /// Display Text for the Saved Vectors
+    /// </summary>
+    public string Vectors { get { return $"\n{GetLastVector()}\n{GetLastVector(1)}"; } }
 
     /// <summary>
     /// Initializes the Transformation Manager
@@ -87,6 +92,7 @@ public class TransformManager
     {
         _worldSpaceManager = worldSpaceManager;
         TranslateAlongVector = false;
+        SavedVectors = new List<Vector3>();
 
         if (GameObject.Find("TranslationPlane") == null)
         {
@@ -110,6 +116,19 @@ public class TransformManager
     }
 
     /// <summary>
+    /// Returns the Last Vector in the Saved Vector list or Last Vector offset by an index if specified
+    /// </summary>
+    /// <param name="index"></param>
+    /// <returns></returns>
+    public Vector3 GetLastVector(int index = 0)
+    {
+        if (SavedVectors.Count > index)
+            return SavedVectors[SavedVectors.Count - index - 1];
+        else
+            return Vector3.zero;
+    }
+
+    /// <summary>
     /// Saves the Previously Selected Object Position
     /// </summary>
     /// <param name="gameObj"></param>
@@ -127,9 +146,12 @@ public class TransformManager
     {
         if (LastPosition != null || LastPosition != Vector3.zero)
         {
-            SavedVector = SelectedObject.transform.position - LastPosition;
+            SavedVectors.Add(SelectedObject.transform.position - LastPosition);
 
-            Debug.DrawRay(LastPosition, SavedVector, Color.red, 1);
+            if (SavedVectors.Count >= 3)
+                SavedVectors.RemoveAt(0);
+
+            Debug.DrawRay(LastPosition, GetLastVector(), Color.red, 1);
         }
     }
 
@@ -157,15 +179,15 @@ public class TransformManager
     {
         if (TranslateAlongVector)
         {
-            Debug.DrawRay(SelectedObject.transform.position, SavedVector * 10, Color.red, 1);
-            Debug.DrawRay(SelectedObject.transform.position, SavedVector * -10, Color.red, 1);
+            Debug.DrawRay(SelectedObject.transform.position, GetLastVector() * 10, Color.red, 1);
+            Debug.DrawRay(SelectedObject.transform.position, GetLastVector() * -10, Color.red, 1);
 
             Vector3 currentMousePositionOnScreen = Input.mousePosition;
             Vector3 deltaMousePosition = (currentMousePositionOnScreen - LastDelta) / 50;
 
             float magnitude = Vector3.Dot(deltaMousePosition, Vector3.one);
 
-            SelectedObject.transform.Translate(SavedVector.normalized * magnitude, Space.World);
+            SelectedObject.transform.Translate(GetLastVector().normalized * magnitude, Space.World);
 
             LastDelta = currentMousePositionOnScreen;
         }

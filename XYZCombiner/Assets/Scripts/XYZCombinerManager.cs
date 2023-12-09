@@ -122,7 +122,7 @@ public class XYZCombinerManager : MonoBehaviour
         UpdateSelectedAtom();
 
         TranslationMode.GetComponent<Text>().text = $"Transformation : {WorldSpaceManager.TransformManager.TransformationAction}";
-        RotationMode.GetComponent<Text>().text = $"Vector : {WorldSpaceManager.TransformManager.SavedVector}";
+        RotationMode.GetComponent<Text>().text = $"Vector : {WorldSpaceManager.TransformManager.Vectors}";
     }
 
     /// <summary>
