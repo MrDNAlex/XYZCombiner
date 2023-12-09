@@ -8,6 +8,11 @@ using UnityEngine;
 public class Atom : MonoBehaviour
 {
     /// <summary>
+    /// Reference to the Molecule that the Atom in Contained in
+    /// </summary>
+    public Molecule ParentMolecule { get; set; }
+
+    /// <summary>
     /// Describes the Atoms Element 
     /// </summary>
     public string Element { get; set; }
@@ -15,19 +20,41 @@ public class Atom : MonoBehaviour
     /// <summary>
     /// Describes the Atoms Position Relative to the Molecule
     /// </summary>
-    public Vector3 Position { get; set; }
+    public Vector3 Position { get { return transform.position; } set { transform.position = value; } }
+
+    /// <summary>
+    /// Returns the True position of the Atom based off the Input File
+    /// </summary>
+    public Vector3 FilePosition { get { return Position + FilePositionOffset; } }
+
+    /// <summary>
+    /// Offset vector for each atom, equal to the average position of the Parent Molecule
+    /// </summary>
+    public Vector3 FilePositionOffset { get; set; }
 
     /// <summary>
     /// Sets the Atoms Information
     /// </summary>
     /// <param name="element"></param>
     /// <param name="position"></param>
-    public void SetInfo(string element, Vector3 position)
+    public void SetInfo(string element, Vector3 position, Molecule parentMolecule)
     {
         Element = element;
         Position = position;
+        ParentMolecule = parentMolecule;
 
         ApplyInfoToModel();
+    }
+
+    /// <summary>
+    /// Offsets the Position of the Atom based on the value offset
+    /// </summary>
+    /// <param name="offset"></param>
+    public void SetOffsetPosition (Vector3 offset)
+    {
+        FilePositionOffset = offset;
+        Position = Position - offset;
+        transform.position = Position;
     }
 
     /// <summary>
@@ -42,6 +69,25 @@ public class Atom : MonoBehaviour
 
         if (Element == "H")
             transform.localScale = new Vector3(0.2f, 0.2f, 0.2f);
+    }
+
+    /// <summary>
+    /// Returns the Atom in XYZ Format
+    /// </summary>
+    /// <returns></returns>
+    public string XYZFormat ()
+    {
+        Vector3 localPosition = transform.localPosition;
+
+        return $"{Element} {localPosition.x} {localPosition.y} {localPosition.z}";
+    }
+
+    /// <summary>
+    /// Destroys the Atom
+    /// </summary>
+    public void DestroyAtom()
+    {
+        GameObject.Destroy(this.gameObject);
     }
 
     /// <summary>

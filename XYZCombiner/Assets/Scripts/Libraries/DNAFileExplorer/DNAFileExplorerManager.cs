@@ -28,6 +28,9 @@ namespace DNAFileExplorer
         /// </summary>
         public string LastPath { get; set; }
 
+        /// <summary>
+        /// Toggle Determining if Debug Commands will be displayed
+        /// </summary>
         public bool DebugMode { get; private set; }
 
         /// <summary>
@@ -65,12 +68,12 @@ namespace DNAFileExplorer
         /// <typeparam name="T"> Return Type </typeparam>
         /// <param name="filePath">  Path to the File Being Loaded </param>
         /// <returns></returns>
-        public T LoadFromJSON<T> (string filePath = null)
+        public T LoadFromJSON<T>(string filePath = null)
         {
             string jsonData = "";
             filePath = filePath != null ? filePath : LastPath;
 
-            if (IsViablePath(filePath))
+            if (IsViableFile(filePath))
                 jsonData = File.ReadAllText(filePath);
 
             if (DebugMode)
@@ -84,12 +87,12 @@ namespace DNAFileExplorer
         /// </summary>
         /// <param name="filePath"> Path to the File Being Loaded </param>
         /// <returns></returns>
-        public string LoadFileAsString (string filePath = null)
+        public string LoadFileAsString(string filePath = null)
         {
             string file = "";
             filePath = filePath != null ? filePath : LastPath;
 
-            if (IsViablePath(filePath))
+            if (IsViableFile(filePath))
                 file = File.ReadAllText(filePath);
 
             if (DebugMode)
@@ -103,7 +106,7 @@ namespace DNAFileExplorer
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public bool IsViablePath (string filePath = null)
+        public bool IsViableFile(string filePath = null)
         {
             filePath = filePath != null ? filePath : LastPath;
 
@@ -117,6 +120,46 @@ namespace DNAFileExplorer
                 Debug.Log("Not a Viable Path");
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Verifies if the Path leads to a Folder
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public bool IsViableFolder(string filePath = null)
+        {
+            filePath = filePath != null ? filePath : LastPath;
+
+            if (Directory.Exists(filePath))
+            {
+                return true;
+            }
+            else
+            {
+                Debug.Log("Not a Viable Directory");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Saves Content into a File with specified Extansion through a File Explorer Window
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="fileExtension"></param>
+        /// <param name="startPath"></param>
+        /// <param name="description"></param>
+        public void SaveToFile(string file, string fileExtension = null, string startPath = null, string description = null)
+        {
+            fileExtension = fileExtension != null ? fileExtension : FileExtension;
+            startPath = startPath != null ? startPath : StartPath;
+            description = description != null ? description : Description;
+
+            string savePath = EditorUtility.SaveFilePanel(description, startPath, file.Split("\n")[1], fileExtension);
+
+            Debug.Log(savePath);
+
+            File.WriteAllText(savePath, file);
         }
     }
 }
