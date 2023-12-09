@@ -5,6 +5,11 @@ using UnityEngine;
 public class TransformManager
 {
     /// <summary>
+    /// Reference to the World Space Manager
+    /// </summary>
+    private WorldSpaceManager _worldSpaceManager { get; set; }
+
+    /// <summary>
     /// Enum to diffirentiate between Transformation Actions
     /// </summary>
     public enum Transformation
@@ -61,10 +66,28 @@ public class TransformManager
     public LayerMask TranslationLayerMask { get { return LayerMask.GetMask("TranslationPlane"); } }
 
     /// <summary>
+    /// Toggle to Determine if the Translation will occur over the Saved Vector
+    /// </summary>
+    public bool TranslateAlongVector;
+
+    /// <summary>
+    /// Saves the Last Position to Determine the Saved Vector
+    /// </summary>
+    public Vector3 LastPosition;
+
+    /// <summary>
+    /// Saves the Vector Used to Translate
+    /// </summary>
+    public Vector3 SavedVector;
+
+    /// <summary>
     /// Initializes the Transformation Manager
     /// </summary>
-    public TransformManager()
+    public TransformManager(WorldSpaceManager worldSpaceManager)
     {
+        _worldSpaceManager = worldSpaceManager;
+        TranslateAlongVector = false;
+
         if (GameObject.Find("TranslationPlane") == null)
         {
             //Not Functional
@@ -87,11 +110,35 @@ public class TransformManager
     }
 
     /// <summary>
+    /// Saves the Previously Selected Object Position
+    /// </summary>
+    /// <param name="gameObj"></param>
+    public void SaveLastPosition()
+    {
+        if (SelectedObject != null)
+            LastPosition = SelectedObject.transform.position;
+    }
+
+    /// <summary>
+    /// Saves the Vector Between the Currently Selected Object and the 
+    /// </summary>
+    /// <param name="position"></param>
+    public void SaveVector()
+    {
+        if (LastPosition != null || LastPosition != Vector3.zero)
+        {
+            SavedVector = SelectedObject.transform.position - LastPosition;
+
+            Debug.DrawRay(LastPosition, SavedVector, Color.red, 1);
+        }
+    }
+
+    /// <summary>
     /// Rotates the Selected Object
     /// </summary>
     public void RotateSelectedObject()
     {
-        (Vector3 currentMousePosition, bool success) = GetRayPosition(TranslationLayerMask);
+        Vector3 currentMousePosition = GetRayPosition(TranslationLayerMask).position;
         Vector3 deltaMousePosition = currentMousePosition - SelectedObject.transform.position;
 
         float angle = Vector3.Angle(LastDelta, deltaMousePosition);
@@ -108,9 +155,26 @@ public class TransformManager
     /// </summary>
     public void TranslateSelectedObject()
     {
-        Vector3 currentMousePosition = GetRayPosition(TranslationLayerMask).position;
+        if (TranslateAlongVector)
+        {
+            Debug.DrawRay(SelectedObject.transform.position, SavedVector * 10, Color.red, 1);
+            Debug.DrawRay(SelectedObject.transform.position, SavedVector * -10, Color.red, 1);
 
-        SelectedObject.transform.position = currentMousePosition;
+            Vector3 currentMousePositionOnScreen = Input.mousePosition;
+            Vector3 deltaMousePosition = (currentMousePositionOnScreen - LastDelta) / 50;
+
+            float magnitude = Vector3.Dot(deltaMousePosition, Vector3.one);
+
+            SelectedObject.transform.Translate(SavedVector.normalized * magnitude, Space.World);
+
+            LastDelta = currentMousePositionOnScreen;
+        }
+        else
+        {
+            Vector3 currentMousePosition = GetRayPosition(TranslationLayerMask).position;
+
+            SelectedObject.transform.position = currentMousePosition;
+        }
     }
 
     /// <summary>
@@ -162,6 +226,7 @@ public class TransformManager
     /// <param name="obj"></param>
     public void SetSelectedObj(GameObject obj)
     {
+        SaveLastPosition();
         SelectedObject = obj;
     }
 
@@ -184,6 +249,28 @@ public class TransformManager
             TransformationAction = Transformation.None;
         else
             TransformationAction = transformation;
+    }
+
+    /// <summary>
+    /// Removes the Selected Object from the World Space
+    /// </summary>
+    private void RemoveSelectedObject()
+    {
+        if (SelectedObject.GetComponent<Molecule>() != null)
+        {
+            Molecule molecule = SelectedObject.GetComponent<Molecule>();
+
+            _worldSpaceManager.Molecules.Remove(molecule);
+            molecule.DestroyMolecule();
+        }
+
+        if (SelectedObject.GetComponent<Atom>() != null)
+        {
+            Atom atom = SelectedObject.GetComponent<Atom>();
+
+            atom.ParentMolecule.Atoms.Remove(atom);
+            atom.DestroyAtom();
+        }
     }
 
     /// <summary>
@@ -210,6 +297,30 @@ public class TransformManager
             _count = 0;
             UpdateGUI?.Invoke();
         }
+
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            TranslateAlongVector = !TranslateAlongVector;
+            if (TranslateAlongVector && LastPosition != null)
+            {
+                SelectedObject.transform.position = LastPosition;
+                Debug.Log("Translate Along Vector");
+            }
+            LastDelta = Input.mousePosition;
+
+            UpdateGUI?.Invoke();
+        }
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            SaveVector();
+            UpdateGUI?.Invoke();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Backspace))
+        {
+            RemoveSelectedObject();
+        }
     }
 
     /// <summary>
@@ -235,5 +346,36 @@ public class TransformManager
                 _goodToRotate = true;
             UpdateGUI?.Invoke();
         }
+    }
+
+    /// <summary>
+    /// Returns the Info of the Selected Atom
+    /// </summary>
+    /// <returns></returns>
+    public string GetSelectedAtom()
+    {
+        if (SelectedObject?.GetComponent<Atom>() != null)
+        {
+            Atom atom = SelectedObject.GetComponent<Atom>();
+            return $" {atom.Element} : {atom.Position} : {atom.FilePosition}";
+        }
+        else
+            return "";
+    }
+
+    /// <summary>
+    /// Returns the Info of the Selected Molecule
+    /// </summary>
+    /// <returns></returns>
+    public string GetSelectedMolecule()
+    {
+        if (SelectedObject?.GetComponent<Molecule>() != null)
+        {
+            Molecule molecule = SelectedObject.GetComponent<Molecule>();
+            return $" {molecule.MoleculeName} : {molecule.Position}";
+        }
+           
+        else
+            return "";
     }
 }

@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
+    //Camera Controls
     public Transform target; // The target object to orbit around
     public float rotationSpeed = 5f;
     public float zoomSpeed = 5f;

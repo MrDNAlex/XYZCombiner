@@ -7,8 +7,6 @@ using UnityEngine.UI;
 
 public class WorldSpaceManager : MonoBehaviour
 {
-    [SerializeField] GameObject TranslationPlane;
-
     /// <summary>
     /// Delegate Function Type for the Update GUI Function
     /// </summary>
@@ -62,7 +60,7 @@ public class WorldSpaceManager : MonoBehaviour
     private void Awake()
     {
         Molecules = new List<Molecule>();
-        TransformManager = new TransformManager();
+        TransformManager = new TransformManager(this);
     }
 
     // Start is called before the first frame update
@@ -74,15 +72,9 @@ public class WorldSpaceManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
         if (Input.GetMouseButtonDown(0))
         {
             SelectAtom();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Backspace))
-        {
-            RemoveAtom();
         }
 
         TransformManager.UpdateTransformations();
@@ -101,9 +93,7 @@ public class WorldSpaceManager : MonoBehaviour
         {
             if (hit.collider != null)
             {
-                SelectedAtom = hit.collider.gameObject.GetComponent<Atom>();
-                SelectedMolecule = SelectedAtom.ParentMolecule;
-                TransformManager.SetSelectedObj(SelectedAtom.gameObject);
+                TransformManager.SetSelectedObj(hit.collider.gameObject);
             }
         }
         else
@@ -112,29 +102,16 @@ public class WorldSpaceManager : MonoBehaviour
             {
                 if (hit.collider != null)
                 {
-                    SelectedMolecule = hit.collider.gameObject.GetComponent<Molecule>();
-                    TransformManager.SetSelectedObj(SelectedMolecule.gameObject);
-                    SelectedAtom = null;
+                    TransformManager.SetSelectedObj(hit.collider.gameObject);
                 }
             }
             else
             {
-                SelectedAtom = null;
-                SelectedMolecule = null;
+                TransformManager.SetSelectedObj(null);
             }
         }
 
         UpdateGUI.Invoke();
-    }
-
-    /// <summary>
-    /// Removes the Atom from the Molecule
-    /// </summary>
-    private void RemoveAtom ()
-    {
-        //Not quite right
-        SelectedMolecule.Atoms.Remove(SelectedAtom);
-        GameObject.Destroy(SelectedAtom.gameObject);
     }
 
     /// <summary>
@@ -173,7 +150,7 @@ public class WorldSpaceManager : MonoBehaviour
     /// <param name="gameObj"></param>
     void RemoveOvelapping(GameObject gameObj)
     {
-        bool overlapping = true;
+        bool overlapping = Molecules.Count == 0 ? false : true;
         int loop = 0;
 
         while (overlapping)

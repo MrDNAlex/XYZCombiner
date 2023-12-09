@@ -5,9 +5,21 @@ using UnityEngine.UI;
 using UnityEngine.Networking;
 using DNAFileExplorer;
 
-
+/// <summary>
+/// Manager controller the XYZ Combiner Application
+/// </summary>
 public class XYZCombinerManager : MonoBehaviour
 {
+    /// <summary>
+    /// Button for Saving the Bundled Molecule to the Device
+    /// </summary>
+    [SerializeField] Button SaveMoleculeBtn;
+
+    /// <summary>
+    /// Button for Bundling all Molecules in Scene into a Single Molecule
+    /// </summary>
+    [SerializeField] Button BundleMolecules;
+
     /// <summary>
     /// Import Molecule Button
     /// </summary>
@@ -48,6 +60,11 @@ public class XYZCombinerManager : MonoBehaviour
     /// </summary>
     public WorldSpaceManager WorldSpaceManager { get; set; }
 
+    /// <summary>
+    /// Manager controlling the Process to Save the Selected Molecule to the Device
+    /// </summary>
+    SaveToXYZManager SaveToXYZ;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -56,9 +73,25 @@ public class XYZCombinerManager : MonoBehaviour
         WorldSpaceManager = WorldSpaceManagerObject.GetComponent<WorldSpaceManager>();
 
         importMoleculeBTN.onClick.AddListener(ImportNewMolecule);
-
+        BundleMolecules.onClick.AddListener(Bundle);
+        
         WorldSpaceManager.UpdateGUI = UpdateUI;
         WorldSpaceManager.TransformManager.SetUpdateFunction(UpdateUI);
+    }
+
+    /// <summary>
+    /// Bundles the Molecules in the Scene into a single
+    /// </summary>
+    public void Bundle()
+    {
+        SaveToXYZ = new SaveToXYZManager();
+
+        SaveToXYZ.BundleIntoMolecule(WorldSpaceManager);
+
+        SaveMoleculeBtn.onClick.RemoveAllListeners();
+        SaveMoleculeBtn.onClick.AddListener(SaveToXYZ.SaveMolecule);
+
+        UpdateUI();
     }
 
     /// <summary>
@@ -86,11 +119,10 @@ public class XYZCombinerManager : MonoBehaviour
         }
 
         UpdateMoleculeList();
-
         UpdateSelectedAtom();
 
         TranslationMode.GetComponent<Text>().text = $"Transformation : {WorldSpaceManager.TransformManager.TransformationAction}";
-
+        RotationMode.GetComponent<Text>().text = $"Vector : {WorldSpaceManager.TransformManager.SavedVector}";
     }
 
     /// <summary>
@@ -100,15 +132,15 @@ public class XYZCombinerManager : MonoBehaviour
     {
         GameObject infoPrefab = Resources.Load<GameObject>("ListInfo");
 
-        string info = WorldSpaceManager.GetSelectedAtom();
+        string info = WorldSpaceManager.TransformManager.GetSelectedAtom();
 
         if (info != "")
         {
             GameObject infoLine = GameObject.Instantiate(infoPrefab, SelectedList.transform);
             infoLine.GetComponent<Text>().text = info;
         }
-      
-        info = WorldSpaceManager.GetSelectedMolecule();
+
+        info = WorldSpaceManager.TransformManager.GetSelectedMolecule();
 
         if (info != "")
         {

@@ -10,7 +10,8 @@ public class Molecule : MonoBehaviour
     /// <summary>
     /// Describes the Molecules Name
     /// </summary>
-    public string MoleculeName { get; set; }
+    public string MoleculeName { get { return this.name; } set { this.name = value; } }
+
     /// <summary>
     /// Describes the Molecules Position Relative to World Space
     /// </summary>
@@ -35,10 +36,14 @@ public class Molecule : MonoBehaviour
     /// </summary>
     public Vector3 MoleculeDimensions { get { return GetComponent<BoxCollider>().size; } private set { GetComponent<BoxCollider>().size = value; } }
 
+    /// <summary>
+    /// Initializes the Molecule
+    /// </summary>
     public Molecule()
     {
         Atoms = new List<Atom>();
     }
+
     /// <summary>
     /// Creates the Molecule from a .XYZ File
     /// </summary>
@@ -51,7 +56,6 @@ public class Molecule : MonoBehaviour
         string[] fileLines = XYZFile.Split("\n");
         int numOfAtoms = int.Parse(fileLines[0]);
         MoleculeName = fileLines[1];
-        this.name = MoleculeName;
 
         for (int i = 2; i < 2 + numOfAtoms; i++)
         {
@@ -106,6 +110,42 @@ public class Molecule : MonoBehaviour
         hitboxDim = hitboxDim + Vector3.one;
 
         MoleculeDimensions = hitboxDim;
+    }
+
+    /// <summary>
+    /// Sets the Molecules Name to a custom Value
+    /// </summary>
+    /// <param name="name"></param>
+    public void SetName(string name)
+    {
+        MoleculeName = name;
+    }
+
+    /// <summary>
+    /// Adds More Atoms to the Molecule
+    /// </summary>
+    /// <param name="atoms"></param>
+    public void AddAtoms(List<Atom> atoms)
+    {
+        //List through every atom, convert to world space, and then convert to local space of this molecule
+        foreach (Atom atom in atoms)
+        {
+            Vector3 worldPos = atom.Position;
+
+            atom.transform.parent = this.transform;
+
+            atom.SetInfo(atom.Element, worldPos, this);
+
+            Atoms.Add(atom);
+        }
+    }
+
+    /// <summary>
+    /// Destroys the Molecule
+    /// </summary>
+    public void DestroyMolecule()
+    {
+        GameObject.Destroy(this.gameObject);
     }
 
     // Start is called before the first frame update

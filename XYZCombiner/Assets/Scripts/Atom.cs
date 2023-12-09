@@ -72,6 +72,25 @@ public class Atom : MonoBehaviour
     }
 
     /// <summary>
+    /// Returns the Atom in XYZ Format
+    /// </summary>
+    /// <returns></returns>
+    public string XYZFormat ()
+    {
+        Vector3 localPosition = transform.localPosition;
+
+        return $"{Element} {localPosition.x} {localPosition.y} {localPosition.z}";
+    }
+
+    /// <summary>
+    /// Destroys the Atom
+    /// </summary>
+    public void DestroyAtom()
+    {
+        GameObject.Destroy(this.gameObject);
+    }
+
+    /// <summary>
     /// Loads the Atoms Material Color from files
     /// </summary>
     /// <returns></returns>
