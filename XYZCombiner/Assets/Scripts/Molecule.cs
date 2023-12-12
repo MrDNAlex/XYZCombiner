@@ -145,6 +145,8 @@ public class Molecule : MonoBehaviour
     /// </summary>
     public void DestroyMolecule()
     {
+        WorldSpaceManager worldSpace = GameObject.Find("WorldSpace").GetComponent<WorldSpaceManager>();
+        worldSpace.Molecules.Remove(this);
         GameObject.Destroy(this.gameObject);
     }
 

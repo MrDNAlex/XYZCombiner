@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 using System.IO;
+using SFB;
 
 namespace DNAFileExplorer
 {
@@ -54,7 +55,9 @@ namespace DNAFileExplorer
             startPath = startPath != null ? startPath : StartPath;
             description = description != null ? description : Description;
 
-            LastPath = EditorUtility.OpenFilePanel(description, startPath, fileExtension);
+            
+
+            LastPath = StandaloneFileBrowser.OpenFilePanel(description, startPath, fileExtension, false)[0];
 
             if (DebugMode)
                 Debug.Log(LastPath);
@@ -141,7 +144,7 @@ namespace DNAFileExplorer
                 return false;
             }
         }
-
+            
         /// <summary>
         /// Saves Content into a File with specified Extansion through a File Explorer Window
         /// </summary>
@@ -155,11 +158,14 @@ namespace DNAFileExplorer
             startPath = startPath != null ? startPath : StartPath;
             description = description != null ? description : Description;
 
-            string savePath = EditorUtility.SaveFilePanel(description, startPath, file.Split("\n")[1], fileExtension);
+            string savePath = StandaloneFileBrowser.SaveFilePanel(description, startPath, file.Split("\n")[1], fileExtension);
 
+
+            savePath = savePath.Replace("\\", "/");
             Debug.Log(savePath);
 
-            File.WriteAllText(savePath, file);
+            if (IsViableFolder(savePath.Substring(0, savePath.LastIndexOf("/"))) && savePath.Length > 0)
+                File.WriteAllText(savePath, file);
         }
     }
 }

@@ -1,15 +1,37 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Networking;
-using DNAFileExplorer;
 
 /// <summary>
 /// Manager controller the XYZ Combiner Application
 /// </summary>
 public class XYZCombinerManager : MonoBehaviour
 {
+    /// <summary>
+    /// Displays the Status of the Specified Axis
+    /// </summary>
+    [SerializeField] Text SpecifiedAxis;
+
+    /// <summary>
+    /// Displays Status of the Translation Mode Toggle
+    /// </summary>
+    [SerializeField] Toggle TranslationToggle;
+
+    /// <summary>
+    /// Displays Status of the Rotation Mode Toggle
+    /// </summary>
+    [SerializeField] Toggle RotationToggle;
+
+    /// <summary>
+    /// Displays Status of Translating Along a Vector
+    /// </summary>
+    [SerializeField] Toggle TranslateAlongVectorToggle;
+
+    /// <summary>
+    /// Displays Status Rotating Objects to align their Vectors
+    /// </summary>
+    [SerializeField] Toggle RotateAlignVectorToggle;
+
     /// <summary>
     /// Button for Saving the Bundled Molecule to the Device
     /// </summary>
@@ -23,7 +45,7 @@ public class XYZCombinerManager : MonoBehaviour
     /// <summary>
     /// Import Molecule Button
     /// </summary>
-    [SerializeField] Button importMoleculeBTN;
+    [SerializeField] Button ImportMoleculeBTN;
 
     /// <summary>
     /// World Space Manager Object 
@@ -39,11 +61,6 @@ public class XYZCombinerManager : MonoBehaviour
     /// Text Box Displaying the Selected Molecule or Atom
     /// </summary>
     [SerializeField] GameObject SelectedList;
-
-    /// <summary>
-    /// Text Box Displaying if the Translation Mode is Active
-    /// </summary>
-    [SerializeField] GameObject TranslationMode;
 
     /// <summary>
     /// Text Box Displaying if the Rotation Mode is Active
@@ -72,9 +89,9 @@ public class XYZCombinerManager : MonoBehaviour
 
         WorldSpaceManager = WorldSpaceManagerObject.GetComponent<WorldSpaceManager>();
 
-        importMoleculeBTN.onClick.AddListener(ImportNewMolecule);
+        ImportMoleculeBTN.onClick.AddListener(ImportNewMolecule);
         BundleMolecules.onClick.AddListener(Bundle);
-        
+
         WorldSpaceManager.UpdateGUI = UpdateUI;
         WorldSpaceManager.TransformManager.SetUpdateFunction(UpdateUI);
     }
@@ -121,8 +138,12 @@ public class XYZCombinerManager : MonoBehaviour
         UpdateMoleculeList();
         UpdateSelectedAtom();
 
-        TranslationMode.GetComponent<Text>().text = $"Transformation : {WorldSpaceManager.TransformManager.TransformationAction}";
-        RotationMode.GetComponent<Text>().text = $"Vector : {WorldSpaceManager.TransformManager.Vectors}";
+        TranslationToggle.isOn = WorldSpaceManager.TransformManager.TransformationAction == TransformManager.Transformation.Translation;
+        RotationToggle.isOn = WorldSpaceManager.TransformManager.TransformationAction == TransformManager.Transformation.Rotation;
+
+        SpecifiedAxis.text = $"Axis: {WorldSpaceManager.TransformManager.TransformAxis}";
+
+        RotationMode.GetComponent<Text>().text = $"Vector : {WorldSpaceManager.TransformManager.GetVectors()}";
     }
 
     /// <summary>

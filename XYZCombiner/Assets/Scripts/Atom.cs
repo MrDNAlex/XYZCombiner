@@ -87,6 +87,7 @@ public class Atom : MonoBehaviour
     /// </summary>
     public void DestroyAtom()
     {
+        ParentMolecule.Atoms.Remove(this);
         GameObject.Destroy(this.gameObject);
     }
 
