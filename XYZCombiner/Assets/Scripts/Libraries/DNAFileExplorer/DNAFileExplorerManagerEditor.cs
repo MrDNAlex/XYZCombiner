@@ -34,7 +34,7 @@ public class DNAFileExplorerManagerEditor : MonoBehaviour
     /// <summary>
     /// Initializes the File Explorer Manager
     /// </summary>
-    public DNAFileExplorerManager(bool debugMode = false)
+    public DNAFileExplorerManagerEditor(bool debugMode = false)
     {
         StartPath = "";
         FileExtension = "";
