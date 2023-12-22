@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using DNAFileExplorer;
 using UnityEngine.UI;
-
+using DNATransformManager;
 
 public class WorldSpaceManager : MonoBehaviour
 {
@@ -50,18 +50,17 @@ public class WorldSpaceManager : MonoBehaviour
     /// <summary>
     /// Currently Selected Atom
     /// </summary>
-    public Atom SelectedAtom { get; set; }
+    public Atom SelectedAtom { get { return TransformManager.SelectedObject?.GetComponent<Atom>(); } }
 
     /// <summary>
     /// Currently Selected Molecule
     /// </summary>
-    public Molecule SelectedMolecule { get; set; }
-
+    public Molecule SelectedMolecule { get { return TransformManager.SelectedObject?.GetComponent<Molecule>(); } }
 
     private void Awake()
     {
         Molecules = new List<Molecule>();
-        TransformManager = new TransformManager(this);
+        TransformManager = new TransformManager();
     }
 
     // Start is called before the first frame update
@@ -94,7 +93,7 @@ public class WorldSpaceManager : MonoBehaviour
         {
             if (hit.collider != null)
             {
-                TransformManager.SetSelectedObj(hit.collider.gameObject);
+                TransformManager.SetSelectedObj(hit.collider.gameObject.GetComponent<TransformableObject>());
             }
         }
         else
@@ -103,7 +102,7 @@ public class WorldSpaceManager : MonoBehaviour
             {
                 if (hit.collider != null)
                 {
-                    TransformManager.SetSelectedObj(hit.collider.gameObject);
+                    TransformManager.SetSelectedObj(hit.collider.gameObject.GetComponent<TransformableObject>());
                 }
             }
             else

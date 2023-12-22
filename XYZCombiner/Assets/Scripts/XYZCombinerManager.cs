@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using DNAFileExplorer;
+using DNATransformManager;
 
 /// <summary>
 /// Manager controller the XYZ Combiner Application
@@ -142,7 +142,7 @@ public class XYZCombinerManager : MonoBehaviour
         TranslationToggle.isOn = WorldSpaceManager.TransformManager.TransformationAction == TransformManager.Transformation.Translation;
         RotationToggle.isOn = WorldSpaceManager.TransformManager.TransformationAction == TransformManager.Transformation.Rotation;
 
-        SpecifiedAxis.text = $"Axis: {WorldSpaceManager.TransformManager.TransformAxis}";
+        SpecifiedAxis.text = $"Axis: {WorldSpaceManager.TransformManager.AxisManager.TransformAxis}";
 
         RotationMode.GetComponent<Text>().text = $"Vector : {WorldSpaceManager.TransformManager.GetVectors()}";
     }
@@ -154,7 +154,7 @@ public class XYZCombinerManager : MonoBehaviour
     {
         GameObject infoPrefab = Resources.Load<GameObject>("ListInfo");
 
-        string info = WorldSpaceManager.TransformManager.GetSelectedAtom();
+        string info = WorldSpaceManager.GetSelectedAtom();
 
         if (info != "")
         {
@@ -162,7 +162,7 @@ public class XYZCombinerManager : MonoBehaviour
             infoLine.GetComponent<Text>().text = info;
         }
 
-        info = WorldSpaceManager.TransformManager.GetSelectedMolecule();
+        info = WorldSpaceManager.GetSelectedMolecule();
 
         if (info != "")
         {
