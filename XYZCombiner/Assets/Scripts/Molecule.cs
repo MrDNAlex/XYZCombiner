@@ -2,20 +2,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DNATransformManager;
+
 /// <summary>
 /// Describes a Molecule in Chemistry
 /// </summary>
-public class Molecule : MonoBehaviour
+public class Molecule : TransformableObject
 {
     /// <summary>
     /// Describes the Molecules Name
     /// </summary>
     public string MoleculeName { get { return this.name; } set { this.name = value; } }
-
-    /// <summary>
-    /// Describes the Molecules Position Relative to World Space
-    /// </summary>
-    public Vector3 Position { get { return transform.position; } set { transform.position = value; } }
 
     /// <summary>
     /// A List of Atoms tht belong to the Molecules
@@ -140,11 +137,11 @@ public class Molecule : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Destroys the Molecule
-    /// </summary>
-    public void DestroyMolecule()
+    /// <inheritdoc/>
+    public override void DestroyObject()
     {
+        WorldSpaceManager worldSpace = GameObject.Find("WorldSpace").GetComponent<WorldSpaceManager>();
+        worldSpace.Molecules.Remove(this);
         GameObject.Destroy(this.gameObject);
     }
 

@@ -44,7 +44,7 @@ public class SaveToXYZManager
         foreach (Molecule molecule in removalList)
         {
             WorldSpaceManager.Molecules.Remove(molecule);
-            molecule.DestroyMolecule();
+            molecule.DestroyObject();
         }
 
         WorldSpaceManager.Molecules.Add(Molecule);
@@ -75,7 +75,7 @@ public class SaveToXYZManager
     public void SaveMolecule ()
     {
         DNAFileExplorerManager fileExplore = new DNAFileExplorerManager(true);
-        fileExplore.FileExtension = "XYZ";
+        fileExplore.FileExtension = "xyz";
         fileExplore.Description = "Save as a XYZ File";
 
         fileExplore.SaveToFile(GetXYZFile());

@@ -1,11 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DNATransformManager;
 
 /// <summary>
 /// Describes a Atom in Chemistry
 /// </summary>
-public class Atom : MonoBehaviour
+public class Atom : TransformableObject
 {
     /// <summary>
     /// Reference to the Molecule that the Atom in Contained in
@@ -16,11 +17,6 @@ public class Atom : MonoBehaviour
     /// Describes the Atoms Element 
     /// </summary>
     public string Element { get; set; }
-
-    /// <summary>
-    /// Describes the Atoms Position Relative to the Molecule
-    /// </summary>
-    public Vector3 Position { get { return transform.position; } set { transform.position = value; } }
 
     /// <summary>
     /// Returns the True position of the Atom based off the Input File
@@ -82,11 +78,10 @@ public class Atom : MonoBehaviour
         return $"{Element} {localPosition.x} {localPosition.y} {localPosition.z}";
     }
 
-    /// <summary>
-    /// Destroys the Atom
-    /// </summary>
-    public void DestroyAtom()
+    /// <inheritdoc/>
+    public override void DestroyObject ()
     {
+        ParentMolecule.Atoms.Remove(this);
         GameObject.Destroy(this.gameObject);
     }
 
