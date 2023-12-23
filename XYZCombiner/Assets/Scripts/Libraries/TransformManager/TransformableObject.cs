@@ -5,31 +5,27 @@ namespace DNATransformManager
     /// <summary>
     /// Class Describing a Transformable Object that can be Trasnformed using the Transform Manager
     /// </summary>
-    public class TransformableObject : MonoBehaviour
+    public class TransformableObject : MonoBehaviour, ITransformableObject
     {
-        /// <summary>
-        /// Gets and Sets the Transformable Objects Position
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Position { get { return transform.position; } set { transform.position = value; } }
 
-        /// <summary>
-        /// Gets and Sets the Transformable Objects Local Position
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 LocalPosition { get { return transform.localPosition; } set { transform.localPosition = value; } }
 
-        /// <summary>
-        /// Gets and Sets the Transformable Objects Rotation
-        /// </summary>
+        /// <inheritdoc/>
         public Quaternion Rotation { get { return transform.rotation; } set { transform.rotation = value; } }
 
-        /// <summary>
-        /// Gets and Sets the Transformable Objects Local Rotation
-        /// </summary>
+        /// <inheritdoc/>
         public Quaternion LocalRotation { get { return transform.localRotation; } set { transform.localRotation = value; } }
 
-        /// <summary>
-        /// Gets the Transformable Objects Parent
-        /// </summary>
+        /// <inheritdoc/>
         public GameObject Parent { get { return transform.parent.gameObject; } }
+
+        /// <inheritdoc/>
+        public virtual void DestroyObject()
+        {
+            GameObject.Destroy(this.gameObject);
+        }
     }
 }

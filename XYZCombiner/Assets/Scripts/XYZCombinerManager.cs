@@ -139,8 +139,8 @@ public class XYZCombinerManager : MonoBehaviour
         UpdateMoleculeList();
         UpdateSelectedAtom();
 
-        TranslationToggle.isOn = WorldSpaceManager.TransformManager.TransformationAction == TransformManager.Transformation.Translation;
-        RotationToggle.isOn = WorldSpaceManager.TransformManager.TransformationAction == TransformManager.Transformation.Rotation;
+        TranslationToggle.isOn = WorldSpaceManager.TransformManager.TransformationAction == Transformation.Translation;
+        RotationToggle.isOn = WorldSpaceManager.TransformManager.TransformationAction == Transformation.Rotation;
 
         SpecifiedAxis.text = $"Axis: {WorldSpaceManager.TransformManager.AxisManager.TransformAxis}";
 

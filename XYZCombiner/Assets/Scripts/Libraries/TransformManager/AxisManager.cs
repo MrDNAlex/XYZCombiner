@@ -7,7 +7,7 @@ namespace DNATransformManager
     /// <summary>
     /// Manager Class Handling and Storing all Axis related Operations
     /// </summary>
-    public class AxisManager 
+    public class AxisManager
     {
         /// <summary>
         /// Stores a Reference to the parent Transform Manager
@@ -25,21 +25,6 @@ namespace DNATransformManager
         public GameObject Line { get; set; }
 
         /// <summary>
-        /// Enum to Differentiate between Transformation Axes
-        /// </summary>
-        public enum Axis
-        {
-            None,
-            X,
-            SelfX,
-            Y,
-            SelfY,
-            Z,
-            SelfZ,
-            Vector
-        }
-
-        /// <summary>
         /// Axis Upon which the Transformation Will Occur
         /// </summary>
         public Axis TransformAxis { get; set; }
@@ -52,7 +37,7 @@ namespace DNATransformManager
         /// <summary>
         /// Initializes the Axis Manager
         /// </summary>
-        public AxisManager (TransformManager transformManager)
+        public AxisManager(TransformManager transformManager)
         {
             TransformManager = transformManager;
             TransformAxis = Axis.None;
@@ -152,7 +137,7 @@ namespace DNATransformManager
         /// <summary>
         /// Toggles the Transform Axis Between None and Vector
         /// </summary>
-       public void ToggleVectorAxis()
+        public void ToggleVectorAxis()
         {
             if (TransformAxis == Axis.None)
                 TransformAxis = Axis.Vector;
@@ -162,5 +147,31 @@ namespace DNATransformManager
                 TransformAxis = Axis.Vector;
         }
 
+        /// <summary>
+        /// Sets the Transformation Axis to the One Specified 
+        /// </summary>
+        public void GetTransformAxis()
+        {
+            if (Input.GetKeyDown(KeyCode.X))
+            {
+                ToggleXAxis();
+                TransformManager.UpdateGUI?.Invoke();
+            }
+            else if (Input.GetKeyDown(KeyCode.Y))
+            {
+                ToggleYAxis();
+                TransformManager.UpdateGUI?.Invoke();
+            }
+            else if (Input.GetKeyDown(KeyCode.Z))
+            {
+                ToggleZAxis();
+                TransformManager.UpdateGUI?.Invoke();
+            }
+            else if (Input.GetKeyDown(KeyCode.V))
+            {
+                ToggleVectorAxis();
+                TransformManager.UpdateGUI?.Invoke();
+            }
+        }
     }
 }

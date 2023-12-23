@@ -78,10 +78,8 @@ public class Atom : TransformableObject
         return $"{Element} {localPosition.x} {localPosition.y} {localPosition.z}";
     }
 
-    /// <summary>
-    /// Destroys the Atom
-    /// </summary>
-    public void DestroyAtom()
+    /// <inheritdoc/>
+    public override void DestroyObject ()
     {
         ParentMolecule.Atoms.Remove(this);
         GameObject.Destroy(this.gameObject);

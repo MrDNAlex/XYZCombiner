@@ -137,10 +137,8 @@ public class Molecule : TransformableObject
         }
     }
 
-    /// <summary>
-    /// Destroys the Molecule
-    /// </summary>
-    public void DestroyMolecule()
+    /// <inheritdoc/>
+    public override void DestroyObject()
     {
         WorldSpaceManager worldSpace = GameObject.Find("WorldSpace").GetComponent<WorldSpaceManager>();
         worldSpace.Molecules.Remove(this);

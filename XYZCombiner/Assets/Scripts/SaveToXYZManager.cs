@@ -44,7 +44,7 @@ public class SaveToXYZManager
         foreach (Molecule molecule in removalList)
         {
             WorldSpaceManager.Molecules.Remove(molecule);
-            molecule.DestroyMolecule();
+            molecule.DestroyObject();
         }
 
         WorldSpaceManager.Molecules.Add(Molecule);

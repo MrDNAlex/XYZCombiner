@@ -19,15 +19,14 @@ namespace DNATransformManager
         public AxisManager AxisManager { get; set; }
 
         /// <summary>
-        /// Enum to diffirentiate between Transformation Actions
+        /// Manager Storing and Handling all Translation Related Operations
         /// </summary>
-        public enum Transformation
-        {
-            None,
-            Translation,
-            Rotation,
-            Scaling
-        }
+        public TranslationManager TranslationManager { get; set; }
+
+        /// <summary>
+        /// Manager Storing and Handling All Rotation Related Operations
+        /// </summary>
+        public RotationManager RotationManager { get; set; }
 
         /// <summary>
         /// Selected Game Object that will have the Transformations Applied to
@@ -38,11 +37,6 @@ namespace DNATransformManager
         /// Last Selected Game Object 
         /// </summary>
         public TransformableObject LastObject { get; set; }
-
-        /// <summary>
-        /// Previous Delta Vector between Mouse and Object Position for Rotation Transformation
-        /// </summary>
-        public Vector3 LastDelta { get; set; }
 
         /// <summary>
         /// Delegate Function type that references to a function to Update a GUI
@@ -80,11 +74,6 @@ namespace DNATransformManager
         public Vector3 LastMouseScreenPosition { get; set; }
 
         /// <summary>
-        /// Stores the Rotation Point on the Screen Relative to the World Space
-        /// </summary>
-        public Vector3 RotationPoint { get; set; }
-
-        /// <summary>
         /// Stores the Origin Position in World Space
         /// </summary>
         public Vector3 Origin { get; set; }
@@ -98,6 +87,8 @@ namespace DNATransformManager
             SavedVectors = new List<VectorAlignments>();
             KeyBinds = new KeyBindManager();
             AxisManager = new AxisManager(this);
+            TranslationManager = new TranslationManager(this);
+            RotationManager = new RotationManager(this);
         }
 
         /// <summary>
@@ -160,94 +151,6 @@ namespace DNATransformManager
         }
 
         /// <summary>
-        /// Gets the Movement Vector for the Selected Object based on the Delta of the Mouse Position
-        /// </summary>
-        /// <returns></returns>
-        private Vector3 GetMovementVector()
-        {
-            CurrentMouseScreenPosition = Input.mousePosition;
-
-            Vector3 cameraForward = Camera.main.transform.up.normalized;
-            Vector3 cameraRight = Camera.main.transform.right.normalized;
-            Vector3 cameraToObject = SelectedObject.Position - Camera.main.transform.position;
-
-            float distanceInCameraDirection = Vector3.Project(cameraToObject, Camera.main.transform.forward).magnitude;
-            float fov = Camera.main.fieldOfView;
-            float scalingFactor = (distanceInCameraDirection * Mathf.Tan(fov * Mathf.Deg2Rad / 2f)) * 2f / Screen.height; // Adjust this formula based on your requirements
-
-            Vector3 deltaMousePosition = (CurrentMouseScreenPosition - LastMouseScreenPosition) * scalingFactor;
-
-            LastMouseScreenPosition = CurrentMouseScreenPosition;
-
-            return cameraForward * deltaMousePosition.y + cameraRight * deltaMousePosition.x;
-        }
-
-        /// <summary>
-        /// Gets the Angle of Rotation based on the Delta Mouse Movement
-        /// </summary>
-        /// <returns></returns>
-        private float GetAngleOfRotation()
-        {
-            RotationPoint = Camera.main.WorldToScreenPoint(SelectedObject.Position);
-
-            Vector3 currentMousePosition = Input.mousePosition;
-            Vector3 deltaMousePosition = currentMousePosition - RotationPoint;
-
-            float angle = Vector3.Angle(LastDelta, deltaMousePosition);
-            int clockwiseMult = Vector3.Dot(Vector3.forward, Vector3.Cross(LastDelta, deltaMousePosition)) > 0 ? -1 : 1;
-
-            LastDelta = deltaMousePosition;
-
-            return angle * clockwiseMult;
-        }
-
-        /// <summary>
-        /// Rotates the Selected Object
-        /// </summary>
-        public void RotateSelectedObject()
-        {
-            Vector3 rotationAxis = AxisManager.GetAxisVector();
-
-            SelectedObject.transform.Rotate(rotationAxis, GetAngleOfRotation(), Space.World);
-
-            AxisManager.AxisLine.SetPositions(new Vector3[] { SelectedObject.Position + rotationAxis * 100, SelectedObject.Position - rotationAxis * 100 });
-        }
-
-        /// <summary>
-        /// Returns a Directional Multiplier of 1 or -1 based on if the controls are needed to be inverted due to the Camera's position
-        /// </summary>
-        /// <param name="axisVector"></param>
-        /// <returns></returns>
-        private float GetDirectionMultiplier()
-        {
-            Vector3 axisVector = AxisManager.GetAxisVector();
-            Vector3 cameraForward = Camera.main.transform.forward;
-            Vector3 projectedCameraForward = Vector3.ProjectOnPlane(cameraForward, axisVector.normalized).normalized;
-
-            return Vector3.Dot(axisVector, projectedCameraForward) > 0 ? -1 : 1;
-        }
-
-        /// <summary>
-        /// Translates the Selected Object
-        /// </summary>
-        public void TranslateSelectedObject()
-        {
-            if (AxisManager.TransformAxis == AxisManager.Axis.None)
-            {
-                AxisManager.AxisLine.enabled = false;
-                SelectedObject.Position += GetMovementVector();
-            }
-            else
-            {
-                Vector3 movementVector = GetMovementVector();
-                float magnitude = Vector3.Dot(movementVector, AxisManager.GetAxisVector());
-
-                SelectedObject.transform.Translate(AxisManager.GetAxisVector().normalized * magnitude * GetDirectionMultiplier(), Space.World);
-                AxisManager.AxisLine.SetPositions(new Vector3[] { SelectedObject.Position + AxisManager.GetAxisVector() * 100, SelectedObject.Position - AxisManager.GetAxisVector() * 100 });
-            }
-        }
-
-        /// <summary>
         /// Sets the Selected Object to Apply Transformations to
         /// </summary>
         /// <param name="obj"></param>
@@ -271,7 +174,7 @@ namespace DNATransformManager
         /// Toggles the Transformation Action Mode
         /// </summary>
         /// <param name="transformation"></param>
-        private void ToggleTransformationMode(Transformation transformation)
+        public void ToggleTransformationMode(Transformation transformation)
         {
             if (TransformationAction == transformation)
                 TransformationAction = Transformation.None;
@@ -284,17 +187,7 @@ namespace DNATransformManager
         /// </summary>
         private void RemoveSelectedObject()
         {
-            if (SelectedObject.GetComponent<Molecule>() != null)
-            {
-                Molecule molecule = SelectedObject.GetComponent<Molecule>();
-                molecule.DestroyMolecule();
-            }
-
-            if (SelectedObject.GetComponent<Atom>() != null)
-            {
-                Atom atom = SelectedObject.GetComponent<Atom>();
-                atom.DestroyAtom();
-            }
+            SelectedObject.DestroyObject();
         }
 
         /// <summary>
@@ -316,21 +209,6 @@ namespace DNATransformManager
             {
                 ToggleTransformationMode(Transformation.None);
                 AxisManager.AxisLine.enabled = false;
-                UpdateGUI?.Invoke();
-            }
-
-            //Translation
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                ToggleTransformationMode(Transformation.Translation);
-                LastMouseScreenPosition = Input.mousePosition;
-                UpdateGUI?.Invoke();
-            }
-
-            //Rotation
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                ToggleTransformationMode(Transformation.Rotation);
                 UpdateGUI?.Invoke();
             }
 
@@ -369,34 +247,7 @@ namespace DNATransformManager
                 }
             }
 
-            GetTransformAxis();
-        }
-
-        /// <summary>
-        /// Sets the Transformation Axis to the One Specified 
-        /// </summary>
-        private void GetTransformAxis()
-        {
-            if (Input.GetKeyDown(KeyCode.X))
-            {
-                AxisManager.ToggleXAxis();
-                UpdateGUI?.Invoke();
-            }
-            else if (Input.GetKeyDown(KeyCode.Y))
-            {
-                AxisManager.ToggleYAxis();
-                UpdateGUI?.Invoke();
-            }
-            else if (Input.GetKeyDown(KeyCode.Z))
-            {
-                AxisManager.ToggleZAxis();
-                UpdateGUI?.Invoke();
-            }
-            else if (Input.GetKeyDown(KeyCode.V))
-            {
-                AxisManager.ToggleVectorAxis();
-                UpdateGUI?.Invoke();
-            }
+            AxisManager.GetTransformAxis();
         }
 
         /// <summary>
@@ -406,17 +257,8 @@ namespace DNATransformManager
         {
             HandleInput();
 
-            if (TransformationAction == Transformation.Translation)
-            {
-                TranslateSelectedObject();
-                UpdateGUI?.Invoke();
-            }
-
-            if (TransformationAction == Transformation.Rotation)
-            {
-                RotateSelectedObject();
-                UpdateGUI?.Invoke();
-            }
+            TranslationManager.UpdateTranslation();
+            RotationManager.UpdateRotation();
         }
     }
 }
